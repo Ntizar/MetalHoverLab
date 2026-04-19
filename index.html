@@ -12,8 +12,8 @@
     <aside class="panel">
       <div class="panel__header">
         <div class="badge-row">
-          <span class="brand-badge">Ntizar Aurora</span>
-          <span class="brand-badge brand-badge--soft">MetalHoverLab</span>
+          <span class="brand-badge">MetalHoverLab</span>
+          <span class="brand-badge brand-badge--soft">Relief Relight</span>
         </div>
 
         <p class="eyebrow">Relief Relight Playground</p>
@@ -26,6 +26,16 @@
       </div>
 
       <section class="controls" aria-label="Controles del efecto">
+        <div class="field">
+          <label>Presets de escena</label>
+          <div class="preset-row">
+            <button id="presetDemo" type="button" class="button button--small">Demo</button>
+            <button id="presetBisonte1" type="button" class="button button--small">Bisonte I</button>
+            <button id="presetBisonte2" type="button" class="button button--small">Bisonte II</button>
+          </div>
+          <p class="hint">Puedes arrancar con la demo interna o cargar directamente las dos escenas reales del bisonte.</p>
+        </div>
+
         <div class="field">
           <label for="sceneUpload">Imagen de relieve</label>
           <input id="sceneUpload" type="file" accept="image/*">
@@ -54,6 +64,14 @@
           </div>
 
           <p class="hint">Usa cualquier color hexadecimal tipo <code>#2563EB</code>. El relieve seguirá teniendo brillo y volumen, pero con ese tono.</p>
+        </div>
+
+        <div class="field">
+          <div class="label-row">
+            <label for="marble">Base mármol</label>
+            <output id="marbleValue" for="marble">46%</output>
+          </div>
+          <input id="marble" type="range" min="0" max="100" value="46">
         </div>
 
         <div class="field">
@@ -116,6 +134,7 @@
           <button id="generateExport" type="button" class="button button--primary">Actualizar export</button>
           <button id="copyExport" type="button" class="button">Copiar snippet</button>
           <button id="copyStandalone" type="button" class="button">Copiar HTML</button>
+          <button id="copyReactExport" type="button" class="button">Copiar React/Next</button>
           <button id="downloadExport" type="button" class="button">Descargar HTML</button>
         </div>
 
@@ -126,6 +145,14 @@
           </div>
           <p class="hint">El export incluye <code>canvas</code> y script inline para reconstruir el relight. Si el destino bloquea scripts inline, usa el HTML completo como base o integra el runtime dentro de tu proyecto.</p>
           <textarea id="exportCode" readonly spellcheck="false"></textarea>
+        </div>
+
+        <div class="field field--export">
+          <div class="label-row">
+            <label for="reactExportCode">Export React / Next</label>
+          </div>
+          <p class="hint">Este bloque crea un componente cliente mínimo para integrar el efecto dentro de apps React o Next.</p>
+          <textarea id="reactExportCode" readonly spellcheck="false"></textarea>
         </div>
       </section>
 
@@ -175,7 +202,7 @@
 
     <main class="preview">
       <div class="preview__toolbar">
-        <span class="pill pill--brand">Ntizar Aurora Relief</span>
+        <span class="pill pill--brand">Interactive relief relight</span>
         <span id="assetStatus" class="pill pill--material">Demo relief activo · Plata</span>
       </div>
 

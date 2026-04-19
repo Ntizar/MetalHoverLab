@@ -6,6 +6,8 @@ ES | EN
 
 Playground estático para relieves blancos o mármol que el cursor metaliza con oro, plata, bronce o cualquier color libre manteniendo la sensación de volumen.
 
+Incluye presets reales, control de intensidad de mármol base y export tanto HTML como React/Next.
+
 ### Objetivo
 
 Tomar una imagen tipo bajorrelieve y producir:
@@ -17,21 +19,23 @@ Tomar una imagen tipo bajorrelieve y producir:
 
 1. Abre `index.html` o entra en GitHub Pages.
 2. Sube una imagen clara de relieve.
-3. Elige oro, plata, bronce o `Color libre`.
-4. Ajusta los controles del foco y del material.
-5. Pulsa `Actualizar export`.
-6. Copia el snippet, copia el HTML completo o descarga el archivo final.
+3. Usa la demo interna o los presets `Bisonte I` y `Bisonte II`.
+4. Elige oro, plata, bronce o `Color libre`.
+5. Ajusta los controles del foco, la base mármol y el material.
+6. Pulsa `Actualizar export`.
+7. Copia el snippet, copia el HTML completo, copia el export React/Next o descarga el archivo final.
 
 ### Controles incluidos
 
 1. Metal o color libre
-2. Radio de luz
-3. Profundidad
-4. Altura de luz
-5. Especular
-6. Tinte metálico
-7. Halo
-8. Aislamiento figuras
+2. Base mármol
+3. Radio de luz
+4. Profundidad
+5. Altura de luz
+6. Especular
+7. Tinte metálico
+8. Halo
+9. Aislamiento figuras
 
 ### Enfoque técnico
 
@@ -72,9 +76,9 @@ Tomar una imagen tipo bajorrelieve y producir:
 
 #### Opción 3. React, Next, Vue o proyectos con bundler
 
-1. Usa el export como referencia.
-2. Mueve el runtime JS a un archivo del proyecto.
-3. Renderiza el contenedor desde tu componente y monta el renderer al cargar.
+1. Usa el bloque `Export React / Next`.
+2. Pega el componente en un archivo cliente del proyecto.
+3. Si quieres, mueve el runtime a un helper compartido en lugar de dejarlo inline.
 4. Mantén el asset de escena como `data URL`, import estático o URL remota.
 
 ### Recomendaciones de imagen
@@ -87,6 +91,8 @@ Tomar una imagen tipo bajorrelieve y producir:
 
 Static playground for white or marble relief scenes that the cursor turns into gold, silver, bronze, or any custom color while preserving depth and volume.
 
+It includes real presets, base marble intensity control, and both HTML and React/Next exports.
+
 ### Goal
 
 Take a bas-relief style image and produce:
@@ -98,21 +104,23 @@ Take a bas-relief style image and produce:
 
 1. Open `index.html` or use GitHub Pages.
 2. Upload a bright relief image.
-3. Choose gold, silver, bronze, or `Custom color`.
-4. Adjust the light and material controls.
-5. Click `Actualizar export`.
-6. Copy the snippet, copy the full HTML, or download the final file.
+3. Use the built-in demo or the `Bisonte I` and `Bisonte II` presets.
+4. Choose gold, silver, bronze, or `Custom color`.
+5. Adjust the light, marble base, and material controls.
+6. Click `Actualizar export`.
+7. Copy the snippet, copy the full HTML, copy the React/Next export, or download the final file.
 
 ### Included controls
 
 1. Metal or custom color
-2. Light radius
-3. Depth
-4. Light height
-5. Specular
-6. Metallic tint
-7. Glow
-8. Figure isolation
+2. Marble base
+3. Light radius
+4. Depth
+5. Light height
+6. Specular
+7. Metallic tint
+8. Glow
+9. Figure isolation
 
 ### Technical approach
 
@@ -153,9 +161,9 @@ Take a bas-relief style image and produce:
 
 #### Option 3. React, Next, Vue, or bundled apps
 
-1. Use the export as a reference.
-2. Move the runtime JS into a project file.
-3. Render the container from your component and mount the renderer on load.
+1. Use the `React / Next export` block.
+2. Paste the component into a client-side file.
+3. Optionally move the runtime into a shared helper instead of keeping it inline.
 4. Keep the relief scene as a `data URL`, a static import, or a remote URL.
 
 ### Image recommendations

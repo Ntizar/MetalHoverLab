@@ -35,6 +35,20 @@ const DEFAULT_SCENE_SVG = `
 
 const DEFAULT_SCENE_DATA_URL = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(DEFAULT_SCENE_SVG)}`;
 const DEFAULT_CUSTOM_COLOR = "#2563EB";
+const SCENE_PRESETS = {
+  demo: {
+    src: DEFAULT_SCENE_DATA_URL,
+    name: "Demo relief"
+  },
+  bisonte1: {
+    src: "assets/reliefs/bisonte.jpg",
+    name: "bisonte.jpg"
+  },
+  bisonte2: {
+    src: "assets/reliefs/bisonte2.jpg",
+    name: "bisonte2.jpg"
+  }
+};
 
 const PRESETS = {
   gold: {
@@ -57,8 +71,10 @@ const PRESETS = {
 const state = {
   sceneSrc: DEFAULT_SCENE_DATA_URL,
   sceneName: "Demo relief",
+  scenePreset: "demo",
   metalPreset: "silver",
   customColor: DEFAULT_CUSTOM_COLOR,
+  marble: 46,
   radius: 32,
   depth: 58,
   lightHeight: 74,
@@ -70,11 +86,15 @@ const state = {
 
 const controls = {
   sceneUpload: document.querySelector("#sceneUpload"),
+  presetDemo: document.querySelector("#presetDemo"),
+  presetBisonte1: document.querySelector("#presetBisonte1"),
+  presetBisonte2: document.querySelector("#presetBisonte2"),
   metalPreset: document.querySelector("#metalPreset"),
   customColorField: document.querySelector("#customColorField"),
   customColor: document.querySelector("#customColor"),
   customHex: document.querySelector("#customHex"),
   customColorValue: document.querySelector("#customColorValue"),
+  marble: document.querySelector("#marble"),
   radius: document.querySelector("#radius"),
   depth: document.querySelector("#depth"),
   lightHeight: document.querySelector("#lightHeight"),
@@ -82,6 +102,7 @@ const controls = {
   tint: document.querySelector("#tint"),
   glow: document.querySelector("#glow"),
   isolate: document.querySelector("#isolate"),
+  marbleValue: document.querySelector("#marbleValue"),
   radiusValue: document.querySelector("#radiusValue"),
   depthValue: document.querySelector("#depthValue"),
   lightHeightValue: document.querySelector("#lightHeightValue"),
@@ -92,9 +113,11 @@ const controls = {
   generateExport: document.querySelector("#generateExport"),
   copyExport: document.querySelector("#copyExport"),
   copyStandalone: document.querySelector("#copyStandalone"),
+  copyReactExport: document.querySelector("#copyReactExport"),
   copyGuideCode: document.querySelector("#copyGuideCode"),
   downloadExport: document.querySelector("#downloadExport"),
   exportCode: document.querySelector("#exportCode"),
+  reactExportCode: document.querySelector("#reactExportCode"),
   guideCode: document.querySelector("#guideCode"),
   assetStatus: document.querySelector("#assetStatus"),
   copyFeedback: document.querySelector("#copyFeedback"),
@@ -265,6 +288,7 @@ function paintReliefFrame(context, frame, buffers, config, pointer) {
   const glowAmount = mix(0, 0.38, config.glow / 100);
   const focusPower = mix(2.8, 0.85, config.isolate / 100);
   const shininess = mix(16, 88, config.specular / 100);
+  const marbleAmount = config.marble / 100;
   const metal = config.metal;
 
   const baseLightX = -0.28;
@@ -292,9 +316,14 @@ function paintReliefFrame(context, frame, buffers, config, pointer) {
       const reliefBoost = focusMask * mix(0.08, 0.28, config.depth / 100);
       const edgeBoost = detail[index] * focusMask * 0.12;
 
-      let r = baseR * (0.98 + baseDiffuse * reliefBoost + edgeBoost) - cavity * 14;
-      let g = baseG * (0.98 + baseDiffuse * reliefBoost + edgeBoost) - cavity * 10;
-      let b = baseB * (0.99 + baseDiffuse * reliefBoost + edgeBoost) - cavity * 8;
+      const marbleBase = mix(1, 0.78, marbleAmount);
+      let r = baseR * (marbleBase + baseDiffuse * reliefBoost + edgeBoost) - cavity * (8 + marbleAmount * 12);
+      let g = baseG * (marbleBase + baseDiffuse * reliefBoost + edgeBoost) - cavity * (6 + marbleAmount * 10);
+      let b = baseB * (marbleBase + baseDiffuse * reliefBoost + edgeBoost) - cavity * (5 + marbleAmount * 9);
+
+      r = mix(r, baseR * 0.98 + 16, marbleAmount * 0.12);
+      g = mix(g, baseG * 0.98 + 12, marbleAmount * 0.12);
+      b = mix(b, baseB * 0.99 + 9, marbleAmount * 0.12);
 
       if (pointerStrength > 0 && radiusPx > 0) {
         const dx = (lightX - x) / radiusPx;
@@ -478,6 +507,7 @@ function getMaterialConfig() {
 
 function getConfigForRenderer() {
   return {
+    marble: Number(state.marble),
     radius: Number(state.radius),
     depth: Number(state.depth),
     lightHeight: Number(state.lightHeight),
@@ -495,6 +525,7 @@ const renderer = mountReliefRenderer(controls.stageMount, {
 });
 
 function updateOutputs() {
+  controls.marbleValue.textContent = `${state.marble}%`;
   controls.radiusValue.textContent = `${state.radius}%`;
   controls.depthValue.textContent = `${state.depth}%`;
   controls.lightHeightValue.textContent = `${state.lightHeight}%`;
@@ -525,12 +556,25 @@ function updateAssetStatus() {
   controls.assetStatus.style.background = `linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(${material.metal.r}, ${material.metal.g}, ${material.metal.b}, 0.58))`;
 }
 
+function updatePresetButtons() {
+  const buttons = [
+    [controls.presetDemo, "demo"],
+    [controls.presetBisonte1, "bisonte1"],
+    [controls.presetBisonte2, "bisonte2"]
+  ];
+
+  for (const [button, preset] of buttons) {
+    button.classList.toggle("button--primary", state.scenePreset === preset);
+  }
+}
+
 function refreshPreview() {
   renderer.setConfig(getConfigForRenderer());
   updateCustomColorVisibility();
   updateCustomColorInputs();
   updateOutputs();
   updateAssetStatus();
+  updatePresetButtons();
 }
 
 function fileToDataUrl(file) {
@@ -604,6 +648,34 @@ function buildExportPayload() {
     sceneSrc: state.sceneSrc,
     config: getConfigForRenderer()
   };
+}
+
+function buildReactExport() {
+  const runtime = buildRuntimeSource();
+  const payload = JSON.stringify(buildExportPayload(), null, 2);
+
+  return `'use client';
+
+import { useEffect, useRef } from 'react';
+
+${runtime}
+
+export default function ReliefHover() {
+  const mountRef = useRef(null);
+
+  useEffect(() => {
+    if (!mountRef.current) return;
+
+    const renderer = mountReliefRenderer(mountRef.current, ${payload});
+    return () => {
+      if (mountRef.current) {
+        mountRef.current.innerHTML = '';
+      }
+    };
+  }, []);
+
+  return <div ref={mountRef} />;
+}`;
 }
 
 function buildExportSnippet() {
@@ -717,6 +789,7 @@ function buildGuideSnippet() {
 
 function updateExportField(focus = false) {
   controls.exportCode.value = buildExportSnippet();
+  controls.reactExportCode.value = buildReactExport();
   if (focus) {
     controls.exportCode.focus();
     controls.exportCode.setSelectionRange(0, 0);
@@ -733,6 +806,10 @@ async function copyExportCode() {
 
 async function copyStandaloneHtml() {
   await writeClipboard(buildStandaloneHtml(), "HTML completo copiado");
+}
+
+async function copyReactExport() {
+  await writeClipboard(controls.reactExportCode.value, "Export React/Next copiado");
 }
 
 async function copyGuideSnippet() {
@@ -772,6 +849,36 @@ function applyCustomHex(value, notify = true) {
   updateExportField();
 }
 
+async function applyScenePreset(presetKey) {
+  const preset = SCENE_PRESETS[presetKey];
+  if (!preset) {
+    return;
+  }
+
+  try {
+    state.scenePreset = presetKey;
+    state.sceneSrc = preset.src;
+    state.sceneName = preset.name;
+    await renderer.setScene(state.sceneSrc);
+    refreshPreview();
+    updateExportField();
+  } catch (error) {
+    showFeedback("No se pudo cargar el preset", true);
+  }
+}
+
+controls.presetDemo.addEventListener("click", () => {
+  applyScenePreset("demo");
+});
+
+controls.presetBisonte1.addEventListener("click", () => {
+  applyScenePreset("bisonte1");
+});
+
+controls.presetBisonte2.addEventListener("click", () => {
+  applyScenePreset("bisonte2");
+});
+
 controls.metalPreset.addEventListener("change", (event) => {
   state.metalPreset = event.target.value;
   refreshPreview();
@@ -800,6 +907,7 @@ controls.sceneUpload.addEventListener("change", async (event) => {
 
   try {
     warnIfLargeAsset(file);
+    state.scenePreset = "upload";
     state.sceneSrc = await fileToDataUrl(file);
     state.sceneName = file.name;
     await renderer.setScene(state.sceneSrc);
@@ -810,6 +918,7 @@ controls.sceneUpload.addEventListener("change", async (event) => {
   }
 });
 
+bindRangeControl("marble");
 bindRangeControl("radius");
 bindRangeControl("depth");
 bindRangeControl("lightHeight");
@@ -823,6 +932,7 @@ controls.generateExport.addEventListener("click", () => {
 });
 controls.copyExport.addEventListener("click", copyExportCode);
 controls.copyStandalone.addEventListener("click", copyStandaloneHtml);
+controls.copyReactExport.addEventListener("click", copyReactExport);
 controls.copyGuideCode.addEventListener("click", copyGuideSnippet);
 controls.downloadExport.addEventListener("click", downloadStandaloneHtml);
 
