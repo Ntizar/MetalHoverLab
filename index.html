@@ -4,36 +4,56 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MetalHoverLab</title>
-  <meta name="description" content="Laboratorio para relieves blancos que el cursor metaliza y relocaliza con luz 3D exportable.">
+  <meta name="description" content="Laboratorio Ntizar Aurora para relieves blancos que el cursor metaliza y relocaliza con luz 3D exportable.">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="nz metalhoverlab" data-nz-theme="light">
   <div class="shell">
     <aside class="panel">
       <div class="panel__header">
-        <p class="eyebrow">MetalHoverLab</p>
+        <div class="badge-row">
+          <span class="brand-badge">Ntizar Aurora</span>
+          <span class="brand-badge brand-badge--soft">MetalHoverLab</span>
+        </div>
+
+        <p class="eyebrow">Relief Relight Playground</p>
         <h1>Relieves 3D que el cursor metaliza</h1>
-        <p class="panel__lead">Sube una escena blanca o marmol tipo bajorrelieve. El laboratorio reconstruye un relieve util a partir de sus sombras para que el puntero anada color metalico, brillo especular y profundidad aparente.</p>
+        <p class="panel__lead">Sube una escena blanca o mármol tipo bajorrelieve. El laboratorio reconstruye un relieve útil a partir de sus sombras para que el puntero añada color metálico, brillo especular y profundidad aparente.</p>
       </div>
 
       <div class="callout">
-        Esta version ya no pinta una silueta plana. Mantiene la imagen original y calcula un relight localizado sobre sus volumenes para acercarse al efecto de figuras con altura que se encienden al pasar por encima.
+        Esta versión ya no pinta una silueta plana. Mantiene la imagen original y calcula un relight localizado sobre sus volúmenes para acercarse al efecto de figuras con altura que se encienden al pasar por encima.
       </div>
 
       <section class="controls" aria-label="Controles del efecto">
         <div class="field">
           <label for="sceneUpload">Imagen de relieve</label>
           <input id="sceneUpload" type="file" accept="image/*">
-          <p class="hint">Funciona mejor con escenas claras, fondo liso y volumenes blancos o gris muy suave. Se puede probar con JPG, PNG o WEBP.</p>
+          <p class="hint">Funciona mejor con escenas claras, fondo liso y volúmenes blancos o gris muy suave. Se puede probar con JPG, PNG o WEBP.</p>
         </div>
 
         <div class="field">
-          <label for="metalPreset">Metal</label>
+          <label for="metalPreset">Metal o color</label>
           <select id="metalPreset">
             <option value="gold">Oro</option>
             <option value="silver" selected>Plata</option>
             <option value="bronze">Bronce</option>
+            <option value="custom">Color libre</option>
           </select>
+        </div>
+
+        <div id="customColorField" class="field" hidden>
+          <div class="label-row">
+            <label for="customColor">Color libre</label>
+            <output id="customColorValue" for="customColor">#2563EB</output>
+          </div>
+
+          <div class="color-input-row">
+            <input id="customColor" type="color" value="#2563eb" aria-label="Selector de color libre">
+            <input id="customHex" type="text" value="#2563EB" inputmode="text" spellcheck="false" aria-label="Color hexadecimal libre">
+          </div>
+
+          <p class="hint">Usa cualquier color hexadecimal tipo <code>#2563EB</code>. El relieve seguirá teniendo brillo y volumen, pero con ese tono.</p>
         </div>
 
         <div class="field">
@@ -70,7 +90,7 @@
 
         <div class="field">
           <div class="label-row">
-            <label for="tint">Tinte metalico</label>
+            <label for="tint">Tinte metálico</label>
             <output id="tintValue" for="tint">64%</output>
           </div>
           <input id="tint" type="range" min="10" max="100" value="64">
@@ -93,8 +113,9 @@
         </div>
 
         <div class="button-row">
-          <button id="generateExport" type="button" class="button button--primary">Exportar codigo</button>
-          <button id="copyExport" type="button" class="button">Copiar</button>
+          <button id="generateExport" type="button" class="button button--primary">Actualizar export</button>
+          <button id="copyExport" type="button" class="button">Copiar snippet</button>
+          <button id="copyStandalone" type="button" class="button">Copiar HTML</button>
           <button id="downloadExport" type="button" class="button">Descargar HTML</button>
         </div>
 
@@ -103,16 +124,59 @@
             <label for="exportCode">Snippet exportado</label>
             <span id="copyFeedback" class="feedback" aria-live="polite"></span>
           </div>
-          <p class="hint">El export incluye canvas y script inline para reconstruir el relight. Si el destino bloquea scripts inline, usa el HTML descargado como base e integra el JS en tu proyecto.</p>
+          <p class="hint">El export incluye <code>canvas</code> y script inline para reconstruir el relight. Si el destino bloquea scripts inline, usa el HTML completo como base o integra el runtime dentro de tu proyecto.</p>
           <textarea id="exportCode" readonly spellcheck="false"></textarea>
+        </div>
+      </section>
+
+      <section class="guide" aria-label="Tutorial de integración">
+        <div class="guide__header">
+          <p class="eyebrow">Tutorial rápido</p>
+          <h2>Cómo llevarlo a una web o proyecto</h2>
+          <p class="guide__lead">Puedes usarlo en HTML estático, CMS que permitan scripts inline o proyectos React/Next/Vue extrayendo el runtime a un archivo JS propio.</p>
+        </div>
+
+        <div class="guide__steps">
+          <article class="guide-card">
+            <span class="guide-card__index">01</span>
+            <h3>Prepara la escena</h3>
+            <p>Usa una imagen clara de relieve. Cuanto más visibles sean las sombras del volumen, mejor responderá la luz.</p>
+          </article>
+
+          <article class="guide-card">
+            <span class="guide-card__index">02</span>
+            <h3>Exporta y copia</h3>
+            <p>Pulsa <code>Actualizar export</code> y luego copia el snippet o el HTML completo según el flujo de tu proyecto.</p>
+          </article>
+
+          <article class="guide-card">
+            <span class="guide-card__index">03</span>
+            <h3>Pega y escala</h3>
+            <p>Escala el efecto editando <code>--mhl-max-width</code>, <code>--mhl-padding</code> y <code>--mhl-radius</code> en la raíz exportada.</p>
+          </article>
+
+          <article class="guide-card">
+            <span class="guide-card__index">04</span>
+            <h3>Integra en frameworks</h3>
+            <p>En React o Next, úsalo dentro de un componente cliente o mueve el runtime exportado a un módulo JS del proyecto.</p>
+          </article>
+        </div>
+
+        <div class="guide__snippet">
+          <div class="guide__snippet-header">
+            <strong>Ejemplo de integración y escalado</strong>
+            <button id="copyGuideCode" type="button" class="button button--small">Copiar ejemplo</button>
+          </div>
+
+          <pre><code id="guideCode"></code></pre>
         </div>
       </section>
     </aside>
 
     <main class="preview">
       <div class="preview__toolbar">
-        <span class="pill">Canvas relief relight</span>
-        <span id="assetStatus" class="pill pill--accent">Demo relief activo</span>
+        <span class="pill pill--brand">Ntizar Aurora Relief</span>
+        <span id="assetStatus" class="pill pill--material">Demo relief activo · Plata</span>
       </div>
 
       <div id="stage" class="stage" aria-label="Preview del relieve metalizado">

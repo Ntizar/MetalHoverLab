@@ -34,21 +34,22 @@ const DEFAULT_SCENE_SVG = `
 </svg>`;
 
 const DEFAULT_SCENE_DATA_URL = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(DEFAULT_SCENE_SVG)}`;
+const DEFAULT_CUSTOM_COLOR = "#2563EB";
 
 const PRESETS = {
   gold: {
     label: "Oro",
-    accent: "#f0d48f",
+    accent: "#F0D48F",
     metal: { r: 236, g: 190, b: 92 }
   },
   silver: {
     label: "Plata",
-    accent: "#d8dde6",
+    accent: "#D8DDE6",
     metal: { r: 214, g: 221, b: 233 }
   },
   bronze: {
     label: "Bronce",
-    accent: "#e0b590",
+    accent: "#E0B590",
     metal: { r: 201, g: 139, b: 89 }
   }
 };
@@ -57,6 +58,7 @@ const state = {
   sceneSrc: DEFAULT_SCENE_DATA_URL,
   sceneName: "Demo relief",
   metalPreset: "silver",
+  customColor: DEFAULT_CUSTOM_COLOR,
   radius: 32,
   depth: 58,
   lightHeight: 74,
@@ -69,6 +71,10 @@ const state = {
 const controls = {
   sceneUpload: document.querySelector("#sceneUpload"),
   metalPreset: document.querySelector("#metalPreset"),
+  customColorField: document.querySelector("#customColorField"),
+  customColor: document.querySelector("#customColor"),
+  customHex: document.querySelector("#customHex"),
+  customColorValue: document.querySelector("#customColorValue"),
   radius: document.querySelector("#radius"),
   depth: document.querySelector("#depth"),
   lightHeight: document.querySelector("#lightHeight"),
@@ -85,8 +91,11 @@ const controls = {
   isolateValue: document.querySelector("#isolateValue"),
   generateExport: document.querySelector("#generateExport"),
   copyExport: document.querySelector("#copyExport"),
+  copyStandalone: document.querySelector("#copyStandalone"),
+  copyGuideCode: document.querySelector("#copyGuideCode"),
   downloadExport: document.querySelector("#downloadExport"),
   exportCode: document.querySelector("#exportCode"),
+  guideCode: document.querySelector("#guideCode"),
   assetStatus: document.querySelector("#assetStatus"),
   copyFeedback: document.querySelector("#copyFeedback"),
   exportField: document.querySelector("#exportField"),
@@ -422,6 +431,51 @@ function mountReliefRenderer(container, payload) {
   };
 }
 
+function normalizeHex(value) {
+  const compact = value.trim();
+  if (!compact) {
+    return null;
+  }
+
+  const prefixed = compact.startsWith("#") ? compact : `#${compact}`;
+  if (/^#[0-9a-fA-F]{6}$/.test(prefixed)) {
+    return prefixed.toUpperCase();
+  }
+
+  if (/^#[0-9a-fA-F]{3}$/.test(prefixed)) {
+    const [, a, b, c] = prefixed;
+    return `#${a}${a}${b}${b}${c}${c}`.toUpperCase();
+  }
+
+  return null;
+}
+
+function hexToRgb(hex) {
+  const normalized = normalizeHex(hex);
+  if (!normalized) {
+    return null;
+  }
+
+  return {
+    r: parseInt(normalized.slice(1, 3), 16),
+    g: parseInt(normalized.slice(3, 5), 16),
+    b: parseInt(normalized.slice(5, 7), 16)
+  };
+}
+
+function getMaterialConfig() {
+  if (state.metalPreset === "custom") {
+    const metal = hexToRgb(state.customColor) || hexToRgb(DEFAULT_CUSTOM_COLOR);
+    return {
+      label: `Color libre ${state.customColor}`,
+      accent: state.customColor,
+      metal
+    };
+  }
+
+  return PRESETS[state.metalPreset];
+}
+
 function getConfigForRenderer() {
   return {
     radius: Number(state.radius),
@@ -431,7 +485,7 @@ function getConfigForRenderer() {
     tint: Number(state.tint),
     glow: Number(state.glow),
     isolate: Number(state.isolate),
-    metal: { ...PRESETS[state.metalPreset].metal }
+    metal: { ...getMaterialConfig().metal }
   };
 }
 
@@ -448,15 +502,33 @@ function updateOutputs() {
   controls.tintValue.textContent = `${state.tint}%`;
   controls.glowValue.textContent = `${state.glow}%`;
   controls.isolateValue.textContent = `${state.isolate}%`;
+  controls.customColorValue.textContent = state.customColor;
+}
+
+function updateCustomColorInputs() {
+  controls.customColor.value = state.customColor;
+  controls.customHex.value = state.customColor;
+  controls.customColorValue.textContent = state.customColor;
+}
+
+function updateCustomColorVisibility() {
+  controls.customColorField.hidden = state.metalPreset !== "custom";
 }
 
 function updateAssetStatus() {
-  controls.assetStatus.textContent = state.sceneName;
-  document.documentElement.style.setProperty("--accent", PRESETS[state.metalPreset].accent);
+  const material = getMaterialConfig();
+  controls.assetStatus.textContent = `${state.sceneName} · ${material.label}`;
+
+  document.documentElement.style.setProperty("--accent", material.accent);
+  document.documentElement.style.setProperty("--material-accent", material.accent);
+  document.documentElement.style.setProperty("--material-rgb", `${material.metal.r}, ${material.metal.g}, ${material.metal.b}`);
+  controls.assetStatus.style.background = `linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(${material.metal.r}, ${material.metal.g}, ${material.metal.b}, 0.58))`;
 }
 
 function refreshPreview() {
   renderer.setConfig(getConfigForRenderer());
+  updateCustomColorVisibility();
+  updateCustomColorInputs();
   updateOutputs();
   updateAssetStatus();
 }
@@ -487,9 +559,34 @@ function warnIfLargeAsset(file) {
   }
 }
 
-function buildExportSnippet() {
-  const exportId = `metal-relief-${Math.random().toString(36).slice(2, 8)}`;
-  const runtime = [
+async function writeClipboard(text, successMessage) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const helper = document.createElement("textarea");
+      helper.value = text;
+      helper.setAttribute("readonly", "true");
+      helper.style.position = "fixed";
+      helper.style.opacity = "0";
+      document.body.appendChild(helper);
+      helper.focus();
+      helper.select();
+      const copied = document.execCommand("copy");
+      document.body.removeChild(helper);
+      if (!copied) {
+        throw new Error("No se pudo copiar");
+      }
+    }
+
+    showFeedback(successMessage);
+  } catch (error) {
+    showFeedback("Copia manual desde el textarea", true);
+  }
+}
+
+function buildRuntimeSource() {
+  return [
     clamp.toString(),
     mix.toString(),
     smoothstep.toString(),
@@ -500,32 +597,45 @@ function buildExportSnippet() {
     paintReliefFrame.toString(),
     mountReliefRenderer.toString()
   ].join("\n\n");
+}
 
-  const payload = {
+function buildExportPayload() {
+  return {
     sceneSrc: state.sceneSrc,
     config: getConfigForRenderer()
   };
+}
+
+function buildExportSnippet() {
+  const exportId = `metal-relief-${Math.random().toString(36).slice(2, 8)}`;
+  const runtime = buildRuntimeSource();
+  const payload = buildExportPayload();
 
   return `<!-- MetalHoverLab relief export -->
 <section id="${exportId}" class="mhl-relief-stage"></section>
 
 <style>
   #${exportId} {
+    --mhl-max-width: 1240px;
+    --mhl-padding: clamp(14px, 2vw, 24px);
+    --mhl-radius: 28px;
+    --mhl-surface: radial-gradient(circle at top left, rgba(255, 255, 255, 0.32), transparent 20%), linear-gradient(180deg, #f2efe9, #e8e3da 38%, #e4ded2 100%);
+    --mhl-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), inset 0 -24px 48px rgba(186, 176, 160, 0.22), 0 28px 70px rgba(0, 0, 0, 0.18);
     position: relative;
-    width: min(100%, 1240px);
+    width: min(100%, var(--mhl-max-width));
     margin: 0 auto;
-    padding: clamp(14px, 2vw, 24px);
-    border-radius: 28px;
+    padding: var(--mhl-padding);
+    border-radius: var(--mhl-radius);
     overflow: hidden;
-    background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.32), transparent 20%), linear-gradient(180deg, #f2efe9, #e8e3da 38%, #e4ded2 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), inset 0 -24px 48px rgba(186, 176, 160, 0.22), 0 28px 70px rgba(0, 0, 0, 0.18);
+    background: var(--mhl-surface);
+    box-shadow: var(--mhl-shadow);
   }
 
   #${exportId} canvas {
     display: block;
     width: 100%;
     height: auto;
-    border-radius: 22px;
+    border-radius: calc(var(--mhl-radius) - 6px);
     box-shadow: 0 18px 50px rgba(130, 118, 98, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.55);
   }
 
@@ -545,8 +655,8 @@ function buildExportSnippet() {
 
   @media (max-width: 720px) {
     #${exportId} {
-      border-radius: 22px;
-      padding: 12px;
+      --mhl-radius: 22px;
+      --mhl-padding: 12px;
     }
   }
 </style>
@@ -557,35 +667,8 @@ mountReliefRenderer(document.getElementById(${JSON.stringify(exportId)}), ${JSON
 </script>`;
 }
 
-function updateExportField(focus = false) {
-  controls.exportCode.value = buildExportSnippet();
-  if (focus) {
-    controls.exportCode.focus();
-    controls.exportCode.setSelectionRange(0, 0);
-  }
-}
-
-async function copyExportCode() {
-  const text = controls.exportCode.value;
-
-  try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text);
-    } else {
-      controls.exportCode.focus();
-      controls.exportCode.select();
-      document.execCommand("copy");
-      controls.exportCode.setSelectionRange(0, 0);
-    }
-
-    showFeedback("Copiado");
-  } catch (error) {
-    showFeedback("Copia manual desde el textarea", true);
-  }
-}
-
-function downloadStandaloneHtml() {
-  const documentHtml = `<!doctype html>
+function buildStandaloneHtml() {
+  return `<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
@@ -598,6 +681,7 @@ function downloadStandaloneHtml() {
       background: #0d1016;
       font-family: Inter, Segoe UI, sans-serif;
     }
+
     body {
       padding: 24px;
     }
@@ -607,8 +691,56 @@ function downloadStandaloneHtml() {
 ${controls.exportCode.value}
 </body>
 </html>`;
+}
 
-  const blob = new Blob([documentHtml], { type: "text/html;charset=utf-8" });
+function buildGuideSnippet() {
+  return `<section class="hero-relief">
+  <!-- Pega aqui el snippet exportado por MetalHoverLab -->
+</section>
+
+<style>
+  .hero-relief [id^="metal-relief-"] {
+    --mhl-max-width: 960px;
+    --mhl-padding: 12px;
+    --mhl-radius: 22px;
+    margin-inline: auto;
+  }
+
+  @media (min-width: 1200px) {
+    .hero-relief [id^="metal-relief-"] {
+      --mhl-max-width: 1280px;
+      --mhl-padding: 18px;
+    }
+  }
+</style>`;
+}
+
+function updateExportField(focus = false) {
+  controls.exportCode.value = buildExportSnippet();
+  if (focus) {
+    controls.exportCode.focus();
+    controls.exportCode.setSelectionRange(0, 0);
+  }
+}
+
+function updateGuideSnippet() {
+  controls.guideCode.textContent = buildGuideSnippet();
+}
+
+async function copyExportCode() {
+  await writeClipboard(controls.exportCode.value, "Snippet copiado");
+}
+
+async function copyStandaloneHtml() {
+  await writeClipboard(buildStandaloneHtml(), "HTML completo copiado");
+}
+
+async function copyGuideSnippet() {
+  await writeClipboard(controls.guideCode.textContent, "Ejemplo copiado");
+}
+
+function downloadStandaloneHtml() {
+  const blob = new Blob([buildStandaloneHtml()], { type: "text/html;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
@@ -625,10 +757,39 @@ function bindRangeControl(id) {
   });
 }
 
+function applyCustomHex(value, notify = true) {
+  const normalized = normalizeHex(value);
+  if (!normalized) {
+    if (notify) {
+      showFeedback("Color hexadecimal invalido", true);
+    }
+    controls.customHex.value = state.customColor;
+    return;
+  }
+
+  state.customColor = normalized;
+  refreshPreview();
+  updateExportField();
+}
+
 controls.metalPreset.addEventListener("change", (event) => {
   state.metalPreset = event.target.value;
   refreshPreview();
   updateExportField();
+});
+
+controls.customColor.addEventListener("input", (event) => {
+  state.customColor = event.target.value.toUpperCase();
+  refreshPreview();
+  updateExportField();
+});
+
+controls.customHex.addEventListener("input", (event) => {
+  event.target.value = event.target.value.toUpperCase();
+});
+
+controls.customHex.addEventListener("change", (event) => {
+  applyCustomHex(event.target.value);
 });
 
 controls.sceneUpload.addEventListener("change", async (event) => {
@@ -661,8 +822,10 @@ controls.generateExport.addEventListener("click", () => {
   updateExportField(true);
 });
 controls.copyExport.addEventListener("click", copyExportCode);
+controls.copyStandalone.addEventListener("click", copyStandaloneHtml);
+controls.copyGuideCode.addEventListener("click", copyGuideSnippet);
 controls.downloadExport.addEventListener("click", downloadStandaloneHtml);
 
-updateOutputs();
-updateAssetStatus();
+refreshPreview();
+updateGuideSnippet();
 updateExportField();
