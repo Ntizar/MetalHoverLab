@@ -553,7 +553,7 @@ function updateAssetStatus() {
   document.documentElement.style.setProperty("--accent", material.accent);
   document.documentElement.style.setProperty("--material-accent", material.accent);
   document.documentElement.style.setProperty("--material-rgb", `${material.metal.r}, ${material.metal.g}, ${material.metal.b}`);
-  controls.assetStatus.style.background = `linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(${material.metal.r}, ${material.metal.g}, ${material.metal.b}, 0.58))`;
+  controls.assetStatus.style.color = material.accent;
 }
 
 function updatePresetButtons() {

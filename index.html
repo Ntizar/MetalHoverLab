@@ -26,7 +26,8 @@
       </div>
 
       <section class="controls" aria-label="Controles del efecto">
-        <div class="field">
+        <div class="field field--group">
+          <div class="group-title">1. Escena</div>
           <label>Presets de escena</label>
           <div class="preset-row">
             <button id="presetDemo" type="button" class="button button--small">Demo</button>
@@ -34,15 +35,14 @@
             <button id="presetBisonte2" type="button" class="button button--small">Bisonte II</button>
           </div>
           <p class="hint">Puedes arrancar con la demo interna o cargar directamente las dos escenas reales del bisonte.</p>
-        </div>
 
-        <div class="field">
           <label for="sceneUpload">Imagen de relieve</label>
           <input id="sceneUpload" type="file" accept="image/*">
           <p class="hint">Funciona mejor con escenas claras, fondo liso y volúmenes blancos o gris muy suave. Se puede probar con JPG, PNG o WEBP.</p>
         </div>
 
-        <div class="field">
+        <div class="field field--group">
+          <div class="group-title">2. Material</div>
           <label for="metalPreset">Metal o color</label>
           <select id="metalPreset">
             <option value="gold">Oro</option>
@@ -80,49 +80,37 @@
             <output id="radiusValue" for="radius">32%</output>
           </div>
           <input id="radius" type="range" min="12" max="56" value="32">
-        </div>
 
-        <div class="field">
           <div class="label-row">
             <label for="depth">Profundidad</label>
             <output id="depthValue" for="depth">58%</output>
           </div>
           <input id="depth" type="range" min="18" max="92" value="58">
-        </div>
 
-        <div class="field">
           <div class="label-row">
             <label for="lightHeight">Altura de luz</label>
             <output id="lightHeightValue" for="lightHeight">74%</output>
           </div>
           <input id="lightHeight" type="range" min="20" max="96" value="74">
-        </div>
 
-        <div class="field">
           <div class="label-row">
             <label for="specular">Especular</label>
             <output id="specularValue" for="specular">76%</output>
           </div>
           <input id="specular" type="range" min="8" max="100" value="76">
-        </div>
 
-        <div class="field">
           <div class="label-row">
             <label for="tint">Tinte metálico</label>
             <output id="tintValue" for="tint">64%</output>
           </div>
           <input id="tint" type="range" min="10" max="100" value="64">
-        </div>
 
-        <div class="field">
           <div class="label-row">
             <label for="glow">Halo</label>
             <output id="glowValue" for="glow">34%</output>
           </div>
           <input id="glow" type="range" min="0" max="100" value="34">
-        </div>
 
-        <div class="field">
           <div class="label-row">
             <label for="isolate">Aislamiento figuras</label>
             <output id="isolateValue" for="isolate">68%</output>
@@ -130,7 +118,9 @@
           <input id="isolate" type="range" min="16" max="100" value="68">
         </div>
 
-        <div class="button-row">
+        <div class="field field--group">
+          <div class="group-title">3. Exportar</div>
+          <div class="button-row">
           <button id="generateExport" type="button" class="button button--primary">Actualizar export</button>
           <button id="copyExport" type="button" class="button">Copiar snippet</button>
           <button id="copyStandalone" type="button" class="button">Copiar HTML</button>
@@ -138,7 +128,7 @@
           <button id="downloadExport" type="button" class="button">Descargar HTML</button>
         </div>
 
-        <div id="exportField" class="field field--export">
+        <div id="exportField" class="field field--export field--simple">
           <div class="label-row">
             <label for="exportCode">Snippet exportado</label>
             <span id="copyFeedback" class="feedback" aria-live="polite"></span>
@@ -147,7 +137,7 @@
           <textarea id="exportCode" readonly spellcheck="false"></textarea>
         </div>
 
-        <div class="field field--export">
+        <div class="field field--export field--simple">
           <div class="label-row">
             <label for="reactExportCode">Export React / Next</label>
           </div>
@@ -201,16 +191,11 @@
     </aside>
 
     <main class="preview">
-      <div class="preview__toolbar">
-        <span class="pill pill--brand">Interactive relief relight</span>
-        <span id="assetStatus" class="pill pill--material">Demo relief activo · Plata</span>
-      </div>
-
       <div id="stage" class="stage" aria-label="Preview del relieve metalizado">
         <div id="stageMount" class="stage__mount"></div>
 
         <div class="stage__caption">
-          <strong>Mueve el cursor sobre la escena</strong>
+          <strong id="assetStatus">Demo relief activo · Plata</strong>
           <span>El color no sustituye el relieve original: lo reutiliza para recalcular luz, especular y volumen aparente en tiempo real.</span>
         </div>
       </div>
