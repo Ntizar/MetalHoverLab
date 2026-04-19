@@ -1,165 +1,464 @@
-const DEFAULT_FIGURE_SVG = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 620" fill="none">
-  <g fill="#ffffff">
-    <circle cx="210" cy="82" r="54" />
-    <path d="M141 150c16-16 39-26 69-26s53 10 69 26c22 22 34 48 34 75v30c0 18-9 35-23 46v19c0 44 14 86 40 119l28 34c21 25 32 56 32 88v31H30v-31c0-32 11-63 32-88l28-34c26-33 40-75 40-119v-19c-14-11-23-28-23-46v-30c0-27 12-53 34-75Z" />
-    <path d="M120 230c0-24 19-43 43-43h94c24 0 43 19 43 43v46c0 24-19 43-43 43h-94c-24 0-43-19-43-43v-46Z" />
-    <rect x="146" y="296" width="128" height="160" rx="54" />
-    <rect x="170" y="438" width="80" height="136" rx="28" />
-    <circle cx="158" cy="250" r="14" />
-    <circle cx="262" cy="250" r="14" />
-    <path d="M178 88c9 9 20 14 32 14 12 0 23-5 32-14 0 37-17 55-32 55-15 0-32-18-32-55Z" />
+const DEFAULT_SCENE_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 920" fill="none">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1400" y2="920" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F2EEE7"/>
+      <stop offset="0.45" stop-color="#EAE4DA"/>
+      <stop offset="1" stop-color="#DDD4C7"/>
+    </linearGradient>
+    <linearGradient id="relief" x1="220" y1="120" x2="1180" y2="760" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FCFBF7"/>
+      <stop offset="0.34" stop-color="#F0EBE1"/>
+      <stop offset="0.68" stop-color="#E1D6C8"/>
+      <stop offset="1" stop-color="#CCC0B2"/>
+    </linearGradient>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="10" dy="16" stdDeviation="18" flood-color="#9F927E" flood-opacity="0.25"/>
+      <feDropShadow dx="-6" dy="-8" stdDeviation="10" flood-color="#FFFFFF" flood-opacity="0.7"/>
+    </filter>
+  </defs>
+  <rect width="1400" height="920" fill="url(#wall)"/>
+  <path d="M116 176C116 153.909 133.909 136 156 136H1244C1266.09 136 1284 153.909 1284 176V744C1284 766.091 1266.09 784 1244 784H156C133.909 784 116 766.091 116 744V176Z" fill="#ECE6DB"/>
+  <g filter="url(#softShadow)" fill="url(#relief)">
+    <path d="M292 666C262 640 248 607 248 570C248 516 282 468 334 454C350 408 390 376 442 376C497 376 543 413 556 465C617 484 660 540 660 605C660 679 600 740 526 740H410C363 740 321 713 292 666Z"/>
+    <circle cx="446" cy="304" r="104"/>
+    <path d="M348 304C376 264 417 240 446 240C475 240 515 264 544 304C523 334 486 360 446 360C406 360 368 334 348 304Z" fill="#F8F5EE"/>
+    <path d="M756 690C734 670 724 640 724 608V356C724 304 766 262 818 262H824C878 262 922 306 922 360V610C922 652 910 684 884 706L854 732C832 751 801 751 779 732L756 690Z"/>
+    <circle cx="821" cy="184" r="88"/>
+    <path d="M988 700C968 682 958 656 958 626V506C958 450 1002 406 1058 406H1080C1135 406 1180 451 1180 506V628C1180 690 1129 740 1067 740C1038 740 1010 726 988 700Z"/>
+    <path d="M1048 424C1011 374 1000 334 1000 292C1000 232 1048 184 1108 184C1168 184 1216 232 1216 292C1216 352 1168 400 1108 400C1084 400 1062 408 1048 424Z"/>
+    <path d="M228 716C228 708 235 702 243 702H1174C1182 702 1189 708 1189 716V732H228V716Z" fill="#D9CFC0"/>
+    <path d="M1017 330C987 313 962 285 946 250C928 212 908 191 877 176C846 161 826 166 810 176C819 129 864 94 914 94C964 94 1016 129 1046 181C1070 223 1066 281 1017 330Z" fill="#F8F5EE"/>
+    <path d="M274 238L302 216L338 245L368 204L410 226L388 268L430 296L396 324L408 372L358 364L334 410L294 382L248 394L250 346L208 322L244 290L226 244L274 238Z" fill="#F4F0E8"/>
   </g>
 </svg>`;
 
-const DEFAULT_FIGURE_DATA_URL = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(DEFAULT_FIGURE_SVG)}`;
-
-const DEFAULT_BACKDROP = "radial-gradient(circle at 18% 16%, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.18) 12%, transparent 32%), radial-gradient(circle at 74% 26%, rgba(255, 255, 255, 0.28) 0%, transparent 24%), linear-gradient(135deg, #efe3c3 0%, #ccb27b 28%, #7f90a7 60%, #273247 100%)";
+const DEFAULT_SCENE_DATA_URL = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(DEFAULT_SCENE_SVG)}`;
 
 const PRESETS = {
   gold: {
     label: "Oro",
-    light: "#fff2b0",
-    mid: "#d8a73c",
-    shadow: "#6b4307",
-    glow: "rgba(255, 209, 107, 0.42)",
-    accent: "#f0d48f"
+    accent: "#f0d48f",
+    metal: { r: 236, g: 190, b: 92 }
   },
   silver: {
     label: "Plata",
-    light: "#ffffff",
-    mid: "#c5ccd5",
-    shadow: "#5e6978",
-    glow: "rgba(236, 240, 255, 0.38)",
-    accent: "#d8dde6"
+    accent: "#d8dde6",
+    metal: { r: 214, g: 221, b: 233 }
   },
   bronze: {
     label: "Bronce",
-    light: "#f3ccae",
-    mid: "#b97843",
-    shadow: "#5b2f14",
-    glow: "rgba(233, 151, 91, 0.34)",
-    accent: "#e0b590"
+    accent: "#e0b590",
+    metal: { r: 201, g: 139, b: 89 }
   }
 };
 
 const state = {
-  metal: "silver",
-  scale: 88,
-  brightness: 118,
-  contrast: 114,
-  sweepWidth: 16,
-  speed: 0.82,
-  glow: 16,
-  backgroundSrc: "",
-  figureSrc: DEFAULT_FIGURE_DATA_URL,
-  backgroundName: "Gradiente demo",
-  figureName: "Placeholder"
+  sceneSrc: DEFAULT_SCENE_DATA_URL,
+  sceneName: "Demo relief",
+  metalPreset: "silver",
+  radius: 32,
+  depth: 58,
+  lightHeight: 74,
+  specular: 76,
+  tint: 64,
+  glow: 34,
+  isolate: 68
 };
 
-const rootStyle = document.documentElement.style;
-
 const controls = {
-  backgroundUpload: document.querySelector("#backgroundUpload"),
-  figureUpload: document.querySelector("#figureUpload"),
+  sceneUpload: document.querySelector("#sceneUpload"),
   metalPreset: document.querySelector("#metalPreset"),
-  scale: document.querySelector("#scale"),
-  brightness: document.querySelector("#brightness"),
-  contrast: document.querySelector("#contrast"),
-  sweepWidth: document.querySelector("#sweepWidth"),
-  speed: document.querySelector("#speed"),
+  radius: document.querySelector("#radius"),
+  depth: document.querySelector("#depth"),
+  lightHeight: document.querySelector("#lightHeight"),
+  specular: document.querySelector("#specular"),
+  tint: document.querySelector("#tint"),
   glow: document.querySelector("#glow"),
+  isolate: document.querySelector("#isolate"),
+  radiusValue: document.querySelector("#radiusValue"),
+  depthValue: document.querySelector("#depthValue"),
+  lightHeightValue: document.querySelector("#lightHeightValue"),
+  specularValue: document.querySelector("#specularValue"),
+  tintValue: document.querySelector("#tintValue"),
+  glowValue: document.querySelector("#glowValue"),
+  isolateValue: document.querySelector("#isolateValue"),
   generateExport: document.querySelector("#generateExport"),
   copyExport: document.querySelector("#copyExport"),
   downloadExport: document.querySelector("#downloadExport"),
   exportCode: document.querySelector("#exportCode"),
   assetStatus: document.querySelector("#assetStatus"),
   copyFeedback: document.querySelector("#copyFeedback"),
-  stage: document.querySelector("#stage"),
-  stageBackdrop: document.querySelector("#stageBackdrop"),
-  scaleValue: document.querySelector("#scaleValue"),
-  brightnessValue: document.querySelector("#brightnessValue"),
-  contrastValue: document.querySelector("#contrastValue"),
-  sweepWidthValue: document.querySelector("#sweepWidthValue"),
-  speedValue: document.querySelector("#speedValue"),
-  glowValue: document.querySelector("#glowValue")
+  exportField: document.querySelector("#exportField"),
+  stageMount: document.querySelector("#stageMount")
 };
 
-const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-
-function setMask(styleTarget, source) {
-  styleTarget.setProperty("--mask-image", `url("${source}")`);
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
 
-function setPointer(styleTarget, x, y) {
-  styleTarget.setProperty("--pointer-x", `${x}%`);
-  styleTarget.setProperty("--pointer-y", `${y}%`);
+function mix(start, end, amount) {
+  return start + (end - start) * amount;
 }
 
-function resetPointer(styleTarget = rootStyle) {
-  setPointer(styleTarget, 54, 33);
+function smoothstep(edge0, edge1, value) {
+  const x = clamp((value - edge0) / (edge1 - edge0 || 1), 0, 1);
+  return x * x * (3 - 2 * x);
 }
 
-function setSweepStops(styleTarget, width) {
-  const outer = clamp(Number(width), 8, 26);
-  const inner = Number((outer * 0.36).toFixed(2));
-  styleTarget.setProperty("--sweep-start", `${50 - outer}%`);
-  styleTarget.setProperty("--sweep-core-start", `${50 - inner}%`);
-  styleTarget.setProperty("--sweep-core-end", `${50 + inner}%`);
-  styleTarget.setProperty("--sweep-end", `${50 + outer}%`);
-}
-
-function applyBackdrop() {
-  if (state.backgroundSrc) {
-    controls.stageBackdrop.style.backgroundImage = `linear-gradient(180deg, rgba(9, 11, 16, 0.08), rgba(9, 11, 16, 0.28)), url("${state.backgroundSrc}")`;
-  } else {
-    controls.stageBackdrop.style.backgroundImage = DEFAULT_BACKDROP;
+function fitImageSize(width, height, maxLongEdge) {
+  const longEdge = Math.max(width, height);
+  if (longEdge <= maxLongEdge) {
+    return { width, height };
   }
+
+  const scale = maxLongEdge / longEdge;
+
+  return {
+    width: Math.max(1, Math.round(width * scale)),
+    height: Math.max(1, Math.round(height * scale))
+  };
 }
 
-function applyPreset() {
-  const preset = PRESETS[state.metal];
-  rootStyle.setProperty("--accent", preset.accent);
-  rootStyle.setProperty("--metal-light", preset.light);
-  rootStyle.setProperty("--metal-mid", preset.mid);
-  rootStyle.setProperty("--metal-shadow", preset.shadow);
-  rootStyle.setProperty("--metal-glow", preset.glow);
+function loadImageElement(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.decoding = "async";
+    image.crossOrigin = "anonymous";
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("No se pudo cargar la imagen"));
+    image.src = src;
+  });
 }
+
+function blurGrayMap(grayImageData, width, height, radiusPx) {
+  const sourceCanvas = document.createElement("canvas");
+  sourceCanvas.width = width;
+  sourceCanvas.height = height;
+  sourceCanvas.getContext("2d", { willReadFrequently: true }).putImageData(grayImageData, 0, 0);
+
+  const outputCanvas = document.createElement("canvas");
+  outputCanvas.width = width;
+  outputCanvas.height = height;
+
+  const outputContext = outputCanvas.getContext("2d", { willReadFrequently: true });
+  if (typeof outputContext.filter === "string") {
+    outputContext.filter = `blur(${radiusPx}px)`;
+  }
+  outputContext.drawImage(sourceCanvas, 0, 0);
+  outputContext.filter = "none";
+
+  const blurredData = outputContext.getImageData(0, 0, width, height).data;
+  const map = new Float32Array(width * height);
+  for (let index = 0, offset = 0; index < map.length; index += 1, offset += 4) {
+    map[index] = blurredData[offset] / 255;
+  }
+
+  return map;
+}
+
+async function buildReliefBuffers(sceneSrc) {
+  const image = await loadImageElement(sceneSrc);
+  const fitted = fitImageSize(image.naturalWidth || image.width, image.naturalHeight || image.height, 1280);
+  const width = fitted.width;
+  const height = fitted.height;
+
+  const baseCanvas = document.createElement("canvas");
+  baseCanvas.width = width;
+  baseCanvas.height = height;
+
+  const baseContext = baseCanvas.getContext("2d", { willReadFrequently: true });
+  baseContext.drawImage(image, 0, 0, width, height);
+  const baseImageData = baseContext.getImageData(0, 0, width, height);
+
+  const grayImageData = baseContext.createImageData(width, height);
+  const grayMap = new Float32Array(width * height);
+
+  for (let index = 0, offset = 0; index < grayMap.length; index += 1, offset += 4) {
+    const r = baseImageData.data[offset];
+    const g = baseImageData.data[offset + 1];
+    const b = baseImageData.data[offset + 2];
+    const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    const grayByte = Math.round(luminance * 255);
+
+    grayMap[index] = luminance;
+    grayImageData.data[offset] = grayByte;
+    grayImageData.data[offset + 1] = grayByte;
+    grayImageData.data[offset + 2] = grayByte;
+    grayImageData.data[offset + 3] = 255;
+  }
+
+  const blurSmall = blurGrayMap(grayImageData, width, height, 3);
+  const blurLarge = blurGrayMap(grayImageData, width, height, 20);
+
+  const seedImageData = baseContext.createImageData(width, height);
+  const gradX = new Float32Array(width * height);
+  const gradY = new Float32Array(width * height);
+  const detail = new Float32Array(width * height);
+
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const index = y * width + x;
+      const leftIndex = y * width + Math.max(0, x - 1);
+      const rightIndex = y * width + Math.min(width - 1, x + 1);
+      const topIndex = Math.max(0, y - 1) * width + x;
+      const bottomIndex = Math.min(height - 1, y + 1) * width + x;
+
+      const gx = (blurSmall[rightIndex] - blurSmall[leftIndex]) * 0.5;
+      const gy = (blurSmall[bottomIndex] - blurSmall[topIndex]) * 0.5;
+      const gradientMagnitude = Math.min(1, Math.sqrt(gx * gx + gy * gy) * 7.2);
+      const localContrast = Math.min(1, Math.abs(grayMap[index] - blurLarge[index]) * 5.8);
+      const seed = Math.min(1, localContrast * 0.95 + gradientMagnitude * 0.82);
+      const seedByte = Math.round(seed * 255);
+      const offset = index * 4;
+
+      gradX[index] = gx;
+      gradY[index] = gy;
+      detail[index] = gradientMagnitude;
+      seedImageData.data[offset] = seedByte;
+      seedImageData.data[offset + 1] = seedByte;
+      seedImageData.data[offset + 2] = seedByte;
+      seedImageData.data[offset + 3] = 255;
+    }
+  }
+
+  const expandedSeed = blurGrayMap(seedImageData, width, height, 30);
+  const reliefMask = new Float32Array(width * height);
+
+  for (let index = 0; index < reliefMask.length; index += 1) {
+    reliefMask[index] = smoothstep(0.035, 0.25, expandedSeed[index]);
+  }
+
+  return {
+    width,
+    height,
+    base: baseImageData.data,
+    gray: grayMap,
+    gradX,
+    gradY,
+    detail,
+    mask: reliefMask
+  };
+}
+
+function paintReliefFrame(context, frame, buffers, config, pointer) {
+  const { width, height, base, gray, gradX, gradY, detail, mask } = buffers;
+  const pixels = frame.data;
+  const lightX = pointer.inside ? pointer.x * width : width * 0.58;
+  const lightY = pointer.inside ? pointer.y * height : height * 0.4;
+  const pointerStrength = pointer.inside ? 1 : 0;
+  const minimumDimension = Math.min(width, height);
+  const radiusPx = minimumDimension * (config.radius / 100);
+  const reliefScale = mix(0.45, 2.65, config.depth / 100);
+  const lightHeight = mix(0.5, 2.6, config.lightHeight / 100);
+  const specularAmount = mix(0.18, 1.55, config.specular / 100);
+  const tintAmount = mix(0.1, 0.82, config.tint / 100);
+  const glowAmount = mix(0, 0.38, config.glow / 100);
+  const focusPower = mix(2.8, 0.85, config.isolate / 100);
+  const shininess = mix(16, 88, config.specular / 100);
+  const metal = config.metal;
+
+  const baseLightX = -0.28;
+  const baseLightY = -0.36;
+  const baseLightZ = 0.89;
+
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const index = y * width + x;
+      const offset = index * 4;
+      const baseR = base[offset];
+      const baseG = base[offset + 1];
+      const baseB = base[offset + 2];
+
+      let nx = -gradX[index] * reliefScale;
+      let ny = -gradY[index] * reliefScale;
+      const normalLength = Math.hypot(nx, ny, 1);
+      nx /= normalLength;
+      ny /= normalLength;
+      const nz = 1 / normalLength;
+
+      const baseDiffuse = Math.max(0, nx * baseLightX + ny * baseLightY + nz * baseLightZ);
+      const focusMask = Math.pow(mask[index], focusPower);
+      const cavity = (1 - gray[index]) * focusMask;
+      const reliefBoost = focusMask * mix(0.08, 0.28, config.depth / 100);
+      const edgeBoost = detail[index] * focusMask * 0.12;
+
+      let r = baseR * (0.98 + baseDiffuse * reliefBoost + edgeBoost) - cavity * 14;
+      let g = baseG * (0.98 + baseDiffuse * reliefBoost + edgeBoost) - cavity * 10;
+      let b = baseB * (0.99 + baseDiffuse * reliefBoost + edgeBoost) - cavity * 8;
+
+      if (pointerStrength > 0 && radiusPx > 0) {
+        const dx = (lightX - x) / radiusPx;
+        const dy = (lightY - y) / radiusPx;
+        const distanceSquared = dx * dx + dy * dy;
+
+        if (distanceSquared < 1.45) {
+          const influence = Math.pow(Math.max(0, 1 - distanceSquared / 1.45), 2.15) * focusMask;
+          const lx = dx;
+          const ly = dy;
+          const lz = lightHeight;
+          const lightLength = Math.hypot(lx, ly, lz);
+          const lightDirX = lx / lightLength;
+          const lightDirY = ly / lightLength;
+          const lightDirZ = lz / lightLength;
+          const diffuse = Math.max(0, nx * lightDirX + ny * lightDirY + nz * lightDirZ);
+
+          const halfX = lightDirX;
+          const halfY = lightDirY;
+          const halfZ = lightDirZ + 1;
+          const halfLength = Math.hypot(halfX, halfY, halfZ);
+          const halfDirX = halfX / halfLength;
+          const halfDirY = halfY / halfLength;
+          const halfDirZ = halfZ / halfLength;
+          const specular = Math.pow(Math.max(0, nx * halfDirX + ny * halfDirY + nz * halfDirZ), shininess);
+
+          const tintMix = influence * tintAmount * (0.2 + diffuse * 0.8);
+          const glowMix = influence * glowAmount * (0.35 + diffuse * 0.65);
+          const reliefLight = 1 + influence * (0.12 + glowAmount * 0.16);
+
+          r = r * reliefLight * (1 - tintMix * 0.42) + metal.r * tintMix;
+          g = g * reliefLight * (1 - tintMix * 0.42) + metal.g * tintMix;
+          b = b * reliefLight * (1 - tintMix * 0.42) + metal.b * tintMix;
+
+          const glowLift = 255 * glowMix;
+          const specLift = 255 * specular * specularAmount * influence;
+          r += glowLift * (metal.r / 255) + specLift;
+          g += glowLift * (metal.g / 255) + specLift;
+          b += glowLift * (metal.b / 255) + specLift;
+        }
+      }
+
+      pixels[offset] = clamp(Math.round(r), 0, 255);
+      pixels[offset + 1] = clamp(Math.round(g), 0, 255);
+      pixels[offset + 2] = clamp(Math.round(b), 0, 255);
+      pixels[offset + 3] = 255;
+    }
+  }
+
+  context.putImageData(frame, 0, 0);
+}
+
+function mountReliefRenderer(container, payload) {
+  const canvas = document.createElement("canvas");
+  const status = document.createElement("div");
+  const context = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
+
+  canvas.setAttribute("aria-hidden", "true");
+  status.className = "stage__status";
+  status.textContent = "Procesando relieve...";
+
+  container.innerHTML = "";
+  container.append(canvas, status);
+
+  let buffers = null;
+  let frame = null;
+  let renderScheduled = false;
+  let activeConfig = { ...payload.config };
+  let pointer = { inside: false, x: 0.58, y: 0.4 };
+
+  function scheduleRender() {
+    if (!buffers || renderScheduled) {
+      return;
+    }
+
+    renderScheduled = true;
+    requestAnimationFrame(() => {
+      renderScheduled = false;
+      paintReliefFrame(context, frame, buffers, activeConfig, pointer);
+    });
+  }
+
+  function updateFromPointerEvent(event) {
+    if (!buffers) {
+      return;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    pointer = {
+      inside: true,
+      x: clamp((event.clientX - rect.left) / rect.width, 0, 1),
+      y: clamp((event.clientY - rect.top) / rect.height, 0, 1)
+    };
+    scheduleRender();
+  }
+
+  container.addEventListener("pointerenter", updateFromPointerEvent);
+  container.addEventListener("pointermove", updateFromPointerEvent);
+  container.addEventListener("pointerleave", () => {
+    pointer = { inside: false, x: 0.58, y: 0.4 };
+    scheduleRender();
+  });
+
+  async function setScene(sceneSrc) {
+    status.hidden = false;
+    status.textContent = "Procesando relieve...";
+
+    try {
+      buffers = await buildReliefBuffers(sceneSrc);
+      canvas.width = buffers.width;
+      canvas.height = buffers.height;
+      frame = context.createImageData(buffers.width, buffers.height);
+      status.hidden = true;
+      scheduleRender();
+    } catch (error) {
+      status.hidden = false;
+      status.textContent = "No se pudo procesar la imagen.";
+      throw error;
+    }
+  }
+
+  function setConfig(nextConfig) {
+    activeConfig = { ...activeConfig, ...nextConfig };
+    scheduleRender();
+  }
+
+  if (payload.sceneSrc) {
+    setScene(payload.sceneSrc).catch(() => {});
+  }
+
+  return {
+    setScene,
+    setConfig
+  };
+}
+
+function getConfigForRenderer() {
+  return {
+    radius: Number(state.radius),
+    depth: Number(state.depth),
+    lightHeight: Number(state.lightHeight),
+    specular: Number(state.specular),
+    tint: Number(state.tint),
+    glow: Number(state.glow),
+    isolate: Number(state.isolate),
+    metal: { ...PRESETS[state.metalPreset].metal }
+  };
+}
+
+const renderer = mountReliefRenderer(controls.stageMount, {
+  sceneSrc: state.sceneSrc,
+  config: getConfigForRenderer()
+});
 
 function updateOutputs() {
-  controls.scaleValue.textContent = `${state.scale}%`;
-  controls.brightnessValue.textContent = `${state.brightness}%`;
-  controls.contrastValue.textContent = `${state.contrast}%`;
-  controls.sweepWidthValue.textContent = `${state.sweepWidth}%`;
-  controls.speedValue.textContent = `${Number(state.speed).toFixed(2)}s`;
-  controls.glowValue.textContent = `${state.glow}px`;
+  controls.radiusValue.textContent = `${state.radius}%`;
+  controls.depthValue.textContent = `${state.depth}%`;
+  controls.lightHeightValue.textContent = `${state.lightHeight}%`;
+  controls.specularValue.textContent = `${state.specular}%`;
+  controls.tintValue.textContent = `${state.tint}%`;
+  controls.glowValue.textContent = `${state.glow}%`;
+  controls.isolateValue.textContent = `${state.isolate}%`;
 }
 
 function updateAssetStatus() {
-  const backgroundStatus = state.backgroundSrc ? `Fondo: ${state.backgroundName}` : "Gradiente demo";
-  const figureStatus = state.figureSrc === DEFAULT_FIGURE_DATA_URL ? "placeholder" : state.figureName;
-  controls.assetStatus.textContent = `${backgroundStatus} + ${figureStatus}`;
+  controls.assetStatus.textContent = state.sceneName;
+  document.documentElement.style.setProperty("--accent", PRESETS[state.metalPreset].accent);
 }
 
-function applyStateToPreview() {
-  applyPreset();
-  rootStyle.setProperty("--artifact-scale", (state.scale / 100).toFixed(2));
-  rootStyle.setProperty("--artifact-brightness", (state.brightness / 100).toFixed(2));
-  rootStyle.setProperty("--artifact-contrast", (state.contrast / 100).toFixed(2));
-  rootStyle.setProperty("--artifact-glow", `${state.glow}px`);
-  rootStyle.setProperty("--sweep-duration", `${Number(state.speed).toFixed(2)}s`);
-  setSweepStops(rootStyle, state.sweepWidth);
-  setMask(rootStyle, state.figureSrc);
-  applyBackdrop();
+function refreshPreview() {
+  renderer.setConfig(getConfigForRenderer());
   updateOutputs();
   updateAssetStatus();
-}
-
-function updatePointerFromEvent(event, styleTarget = rootStyle, element = controls.stage) {
-  const rect = element.getBoundingClientRect();
-  const x = clamp(((event.clientX - rect.left) / rect.width) * 100, 4, 96);
-  const y = clamp(((event.clientY - rect.top) / rect.height) * 100, 4, 96);
-  setPointer(styleTarget, x, y);
 }
 
 function fileToDataUrl(file) {
@@ -173,242 +472,88 @@ function fileToDataUrl(file) {
 
 function showFeedback(message, isError = false) {
   controls.copyFeedback.textContent = message;
-  const exportField = document.querySelector("#exportField");
-  exportField.classList.toggle("field--error", isError);
+  controls.exportField.classList.toggle("field--error", isError);
 
   window.setTimeout(() => {
     controls.copyFeedback.textContent = "";
-    exportField.classList.remove("field--error");
+    controls.exportField.classList.remove("field--error");
   }, isError ? 3200 : 1800);
 }
 
-function warnIfLargeAsset(file, label) {
+function warnIfLargeAsset(file) {
   const sizeInMb = file.size / (1024 * 1024);
-  if (sizeInMb >= 1.5) {
-    showFeedback(`${label} pesado: ${sizeInMb.toFixed(1)} MB en el export`, false);
+  if (sizeInMb >= 2) {
+    showFeedback(`Imagen pesada: ${sizeInMb.toFixed(1)} MB en el export`, false);
   }
 }
 
 function buildExportSnippet() {
-  const exportId = `metal-hover-${Math.random().toString(36).slice(2, 8)}`;
-  const config = {
-    metal: state.metal,
-    scale: Number(state.scale),
-    brightness: Number(state.brightness),
-    contrast: Number(state.contrast),
-    sweepWidth: Number(state.sweepWidth),
-    speed: Number(Number(state.speed).toFixed(2)),
-    glow: Number(state.glow),
-    backgroundSrc: state.backgroundSrc,
-    figureSrc: state.figureSrc
+  const exportId = `metal-relief-${Math.random().toString(36).slice(2, 8)}`;
+  const runtime = [
+    clamp.toString(),
+    mix.toString(),
+    smoothstep.toString(),
+    fitImageSize.toString(),
+    loadImageElement.toString(),
+    blurGrayMap.toString(),
+    buildReliefBuffers.toString(),
+    paintReliefFrame.toString(),
+    mountReliefRenderer.toString()
+  ].join("\n\n");
+
+  const payload = {
+    sceneSrc: state.sceneSrc,
+    config: getConfigForRenderer()
   };
 
-  return `<!-- MetalHoverLab export -->
-<section id="${exportId}" class="mhl-stage">
-  <div class="mhl-stage__backdrop"></div>
-  <div class="mhl-stage__grain"></div>
-  <div class="mhl-artifact">
-    <div class="mhl-layer mhl-base"></div>
-    <div class="mhl-layer mhl-sheen"></div>
-    <div class="mhl-layer mhl-pointer"></div>
-    <div class="mhl-rim"></div>
-  </div>
-</section>
+  return `<!-- MetalHoverLab relief export -->
+<section id="${exportId}" class="mhl-relief-stage"></section>
 
 <style>
   #${exportId} {
-    --metal-light: #ffffff;
-    --metal-mid: #c5ccd5;
-    --metal-shadow: #5e6978;
-    --metal-glow: rgba(236, 240, 255, 0.38);
-    --artifact-scale: 0.88;
-    --artifact-brightness: 1.18;
-    --artifact-contrast: 1.14;
-    --artifact-glow: 16px;
-    --pointer-x: 54%;
-    --pointer-y: 33%;
-    --sweep-duration: 0.82s;
-    --sweep-start: 34%;
-    --sweep-core-start: 44.24%;
-    --sweep-core-end: 55.76%;
-    --sweep-end: 66%;
-    --mask-image: none;
     position: relative;
-    min-height: 540px;
+    width: min(100%, 1240px);
+    margin: 0 auto;
+    padding: clamp(14px, 2vw, 24px);
     border-radius: 28px;
     overflow: hidden;
-    isolation: isolate;
-    background: #171b24;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 28px 70px rgba(0, 0, 0, 0.24);
+    background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.32), transparent 20%), linear-gradient(180deg, #f2efe9, #e8e3da 38%, #e4ded2 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), inset 0 -24px 48px rgba(186, 176, 160, 0.22), 0 28px 70px rgba(0, 0, 0, 0.18);
   }
 
-  #${exportId}::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(17, 21, 29, 0.02), rgba(7, 10, 16, 0.4)), radial-gradient(circle at 18% 16%, rgba(255, 255, 255, 0.22), transparent 18%), radial-gradient(circle at 72% 18%, rgba(255, 255, 255, 0.12), transparent 22%);
-    pointer-events: none;
-    z-index: 1;
+  #${exportId} canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 22px;
+    box-shadow: 0 18px 50px rgba(130, 118, 98, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.55);
   }
 
-  #${exportId} .mhl-stage__backdrop,
-  #${exportId} .mhl-stage__grain,
-  #${exportId} .mhl-artifact {
-    position: absolute;
-  }
-
-  #${exportId} .mhl-stage__backdrop,
-  #${exportId} .mhl-stage__grain {
-    inset: 0;
-  }
-
-  #${exportId} .mhl-stage__backdrop {
-    background-position: center;
-    background-size: cover;
-    transform: scale(1.02);
-    filter: saturate(1.02) contrast(1.03);
-  }
-
-  #${exportId} .mhl-stage__grain {
-    z-index: 2;
-    pointer-events: none;
-    opacity: 0.2;
-    background-image: linear-gradient(transparent, rgba(255, 255, 255, 0.04)), repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 5px);
-    mix-blend-mode: soft-light;
-  }
-
-  #${exportId} .mhl-artifact {
-    z-index: 3;
-    right: clamp(1rem, 4vw, 3.2rem);
-    bottom: clamp(1rem, 4vw, 2.4rem);
-    width: min(38vw, 460px);
-    aspect-ratio: 0.68 / 1;
-    transform: scale(var(--artifact-scale));
-    transform-origin: bottom center;
-    transition: transform 0.22s ease, filter 0.22s ease;
-    filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.36)) drop-shadow(0 0 var(--artifact-glow) var(--metal-glow));
-    isolation: isolate;
-  }
-
-  #${exportId}:hover .mhl-artifact {
-    transform: scale(calc(var(--artifact-scale) + 0.03));
-  }
-
-  #${exportId} .mhl-layer,
-  #${exportId} .mhl-rim {
-    position: absolute;
-    inset: 0;
-    -webkit-mask-image: var(--mask-image);
-    mask-image: var(--mask-image);
-    -webkit-mask-position: center;
-    mask-position: center;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-size: contain;
-    mask-size: contain;
-    -webkit-mask-mode: alpha;
-    mask-mode: alpha;
-  }
-
-  #${exportId} .mhl-base {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 28%), radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.16) 12%, transparent 34%), linear-gradient(120deg, var(--metal-shadow) 0%, var(--metal-mid) 15%, var(--metal-light) 28%, #ffffff 33%, var(--metal-mid) 44%, var(--metal-shadow) 61%, var(--metal-light) 76%, var(--metal-mid) 88%, var(--metal-shadow) 100%);
-    filter: brightness(var(--artifact-brightness)) contrast(var(--artifact-contrast)) saturate(1.18);
-  }
-
-  #${exportId} .mhl-sheen {
-    background: linear-gradient(108deg, transparent var(--sweep-start), rgba(255, 255, 255, 0.12) var(--sweep-core-start), rgba(255, 255, 255, 0.92) 50%, rgba(255, 255, 255, 0.16) var(--sweep-core-end), transparent var(--sweep-end));
-    transform: translateX(-118%);
-    opacity: 0.95;
-    filter: blur(1px);
-    mix-blend-mode: screen;
-    transition: transform var(--sweep-duration) cubic-bezier(0.2, 0.72, 0.3, 1), opacity 0.24s ease;
-  }
-
-  #${exportId}:hover .mhl-sheen {
-    transform: translateX(118%);
-  }
-
-  #${exportId} .mhl-pointer {
-    background: radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.28) 12%, rgba(255, 255, 255, 0.08) 22%, transparent 40%);
-    filter: blur(1.4px);
-    mix-blend-mode: screen;
-    opacity: 0.72;
-    transition: opacity 0.2s ease;
-  }
-
-  #${exportId}:not(:hover) .mhl-pointer {
-    opacity: 0.46;
-  }
-
-  #${exportId} .mhl-rim {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.48), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.18)), linear-gradient(90deg, rgba(255, 255, 255, 0.16), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.18));
-    mix-blend-mode: soft-light;
+  #${exportId} .stage__status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 68px;
+    padding: 14px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(110, 98, 83, 0.16);
+    background: rgba(248, 244, 236, 0.68);
+    color: #5b544b;
+    backdrop-filter: blur(18px);
+    box-shadow: 0 18px 48px rgba(131, 120, 103, 0.14);
   }
 
   @media (max-width: 720px) {
     #${exportId} {
-      min-height: 420px;
       border-radius: 22px;
-    }
-
-    #${exportId} .mhl-artifact {
-      width: min(64vw, 300px);
-      right: 10px;
-      bottom: 10px;
+      padding: 12px;
     }
   }
 </style>
 
 <script>
-  (() => {
-    const root = document.getElementById(${JSON.stringify(exportId)});
-    if (!root) return;
-
-    const config = ${JSON.stringify(config, null, 2)};
-    const presets = ${JSON.stringify(PRESETS, null, 2)};
-    const fallbackBackdrop = ${JSON.stringify(DEFAULT_BACKDROP)};
-    const backdrop = root.querySelector(".mhl-stage__backdrop");
-    const style = root.style;
-    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-    const setPointer = (x, y) => {
-      style.setProperty("--pointer-x", \`\${x}%\`);
-      style.setProperty("--pointer-y", \`\${y}%\`);
-    };
-    const setSweepStops = (width) => {
-      const outer = clamp(Number(width), 8, 26);
-      const inner = Number((outer * 0.36).toFixed(2));
-      style.setProperty("--sweep-start", \`\${50 - outer}%\`);
-      style.setProperty("--sweep-core-start", \`\${50 - inner}%\`);
-      style.setProperty("--sweep-core-end", \`\${50 + inner}%\`);
-      style.setProperty("--sweep-end", \`\${50 + outer}%\`);
-    };
-    const applyConfig = () => {
-      const preset = presets[config.metal];
-      style.setProperty("--metal-light", preset.light);
-      style.setProperty("--metal-mid", preset.mid);
-      style.setProperty("--metal-shadow", preset.shadow);
-      style.setProperty("--metal-glow", preset.glow);
-      style.setProperty("--artifact-scale", (config.scale / 100).toFixed(2));
-      style.setProperty("--artifact-brightness", (config.brightness / 100).toFixed(2));
-      style.setProperty("--artifact-contrast", (config.contrast / 100).toFixed(2));
-      style.setProperty("--artifact-glow", \`\${config.glow}px\`);
-      style.setProperty("--sweep-duration", \`\${Number(config.speed).toFixed(2)}s\`);
-      style.setProperty("--mask-image", \`url("\${config.figureSrc}")\`);
-      setSweepStops(config.sweepWidth);
-      backdrop.style.backgroundImage = config.backgroundSrc ? \`linear-gradient(180deg, rgba(9, 11, 16, 0.08), rgba(9, 11, 16, 0.28)), url("\${config.backgroundSrc}")\` : fallbackBackdrop;
-      setPointer(54, 33);
-    };
-    const handlePointer = (event) => {
-      const rect = root.getBoundingClientRect();
-      const x = clamp(((event.clientX - rect.left) / rect.width) * 100, 4, 96);
-      const y = clamp(((event.clientY - rect.top) / rect.height) * 100, 4, 96);
-      setPointer(x, y);
-    };
-    root.addEventListener("pointerenter", handlePointer);
-    root.addEventListener("pointermove", handlePointer);
-    root.addEventListener("pointerleave", () => setPointer(54, 33));
-    applyConfig();
-  })();
+${runtime}
+mountReliefRenderer(document.getElementById(${JSON.stringify(exportId)}), ${JSON.stringify(payload, null, 2)});
 </script>`;
 }
 
@@ -467,71 +612,57 @@ ${controls.exportCode.value}
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = "metal-hover-export.html";
+  anchor.download = "metal-relief-export.html";
   anchor.click();
   URL.revokeObjectURL(url);
 }
 
-function bindRange(id, parser = Number) {
+function bindRangeControl(id) {
   controls[id].addEventListener("input", (event) => {
-    state[id] = parser(event.target.value);
-    applyStateToPreview();
+    state[id] = Number(event.target.value);
+    refreshPreview();
     updateExportField();
   });
 }
 
 controls.metalPreset.addEventListener("change", (event) => {
-  state.metal = event.target.value;
-  applyStateToPreview();
+  state.metalPreset = event.target.value;
+  refreshPreview();
   updateExportField();
 });
 
-bindRange("scale");
-bindRange("brightness");
-bindRange("contrast");
-bindRange("sweepWidth");
-bindRange("speed", Number);
-bindRange("glow");
-
-controls.backgroundUpload.addEventListener("change", async (event) => {
+controls.sceneUpload.addEventListener("change", async (event) => {
   const file = event.target.files?.[0];
-  if (!file) return;
+  if (!file) {
+    return;
+  }
+
   try {
-    warnIfLargeAsset(file, "Fondo");
-    state.backgroundSrc = await fileToDataUrl(file);
-    state.backgroundName = file.name;
-    applyStateToPreview();
+    warnIfLargeAsset(file);
+    state.sceneSrc = await fileToDataUrl(file);
+    state.sceneName = file.name;
+    await renderer.setScene(state.sceneSrc);
+    refreshPreview();
     updateExportField();
   } catch (error) {
-    showFeedback("No se pudo leer el fondo", true);
+    showFeedback("No se pudo leer la imagen", true);
   }
 });
 
-controls.figureUpload.addEventListener("change", async (event) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
-  try {
-    warnIfLargeAsset(file, "Figura");
-    state.figureSrc = await fileToDataUrl(file);
-    state.figureName = file.name;
-    applyStateToPreview();
-    updateExportField();
-  } catch (error) {
-    showFeedback("No se pudo leer la figura", true);
-  }
-});
+bindRangeControl("radius");
+bindRangeControl("depth");
+bindRangeControl("lightHeight");
+bindRangeControl("specular");
+bindRangeControl("tint");
+bindRangeControl("glow");
+bindRangeControl("isolate");
 
 controls.generateExport.addEventListener("click", () => {
   updateExportField(true);
 });
-
 controls.copyExport.addEventListener("click", copyExportCode);
 controls.downloadExport.addEventListener("click", downloadStandaloneHtml);
 
-controls.stage.addEventListener("pointerenter", (event) => updatePointerFromEvent(event));
-controls.stage.addEventListener("pointermove", (event) => updatePointerFromEvent(event));
-controls.stage.addEventListener("pointerleave", () => resetPointer());
-
-applyStateToPreview();
-resetPointer();
+updateOutputs();
+updateAssetStatus();
 updateExportField();

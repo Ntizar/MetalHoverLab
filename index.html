@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MetalHoverLab</title>
-  <meta name="description" content="Playground para probar hovers metalizados exportables con oro, plata y bronce.">
+  <meta name="description" content="Laboratorio para relieves blancos que el cursor metaliza y relocaliza con luz 3D exportable.">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -12,25 +12,19 @@
     <aside class="panel">
       <div class="panel__header">
         <p class="eyebrow">MetalHoverLab</p>
-        <h1>Hover metalizado exportable para cualquier web</h1>
-        <p class="panel__lead">Sube un fondo y una figura blanca en PNG o SVG con transparencia. Ajusta el efecto y exporta un snippet HTML/CSS/JS portable para integraciones donde se permitan estilos y script inline.</p>
+        <h1>Relieves 3D que el cursor metaliza</h1>
+        <p class="panel__lead">Sube una escena blanca o marmol tipo bajorrelieve. El laboratorio reconstruye un relieve util a partir de sus sombras para que el puntero anada color metalico, brillo especular y profundidad aparente.</p>
       </div>
 
       <div class="callout">
-        La referencia inspeccionada parece usar Rive sobre <code>canvas</code>. Este laboratorio la traduce a una version portable con <code>mask-image</code>, gradientes metalicos y brillo reactivo al puntero.
+        Esta version ya no pinta una silueta plana. Mantiene la imagen original y calcula un relight localizado sobre sus volumenes para acercarse al efecto de figuras con altura que se encienden al pasar por encima.
       </div>
 
       <section class="controls" aria-label="Controles del efecto">
         <div class="field">
-          <label for="backgroundUpload">Fondo</label>
-          <input id="backgroundUpload" type="file" accept="image/*">
-          <p class="hint">Si no subes nada, se usa un gradiente editorial de prueba. Si la imagen es muy grande, el export final pesara bastante.</p>
-        </div>
-
-        <div class="field">
-          <label for="figureUpload">Figura blanca</label>
-          <input id="figureUpload" type="file" accept="image/png,image/webp,image/svg+xml">
-          <p class="hint">Ideal: PNG o SVG con transparencia. El efecto usa la silueta como mascara y embebe el asset en el snippet exportado.</p>
+          <label for="sceneUpload">Imagen de relieve</label>
+          <input id="sceneUpload" type="file" accept="image/*">
+          <p class="hint">Funciona mejor con escenas claras, fondo liso y volumenes blancos o gris muy suave. Se puede probar con JPG, PNG o WEBP.</p>
         </div>
 
         <div class="field">
@@ -44,50 +38,58 @@
 
         <div class="field">
           <div class="label-row">
-            <label for="scale">Tamano</label>
-            <output id="scaleValue" for="scale">88%</output>
+            <label for="radius">Radio de luz</label>
+            <output id="radiusValue" for="radius">32%</output>
           </div>
-          <input id="scale" type="range" min="60" max="120" value="88">
+          <input id="radius" type="range" min="12" max="56" value="32">
         </div>
 
         <div class="field">
           <div class="label-row">
-            <label for="brightness">Luminosidad</label>
-            <output id="brightnessValue" for="brightness">118%</output>
+            <label for="depth">Profundidad</label>
+            <output id="depthValue" for="depth">58%</output>
           </div>
-          <input id="brightness" type="range" min="70" max="170" value="118">
+          <input id="depth" type="range" min="18" max="92" value="58">
         </div>
 
         <div class="field">
           <div class="label-row">
-            <label for="contrast">Contraste</label>
-            <output id="contrastValue" for="contrast">114%</output>
+            <label for="lightHeight">Altura de luz</label>
+            <output id="lightHeightValue" for="lightHeight">74%</output>
           </div>
-          <input id="contrast" type="range" min="80" max="180" value="114">
+          <input id="lightHeight" type="range" min="20" max="96" value="74">
         </div>
 
         <div class="field">
           <div class="label-row">
-            <label for="sweepWidth">Ancho del brillo</label>
-            <output id="sweepWidthValue" for="sweepWidth">16%</output>
+            <label for="specular">Especular</label>
+            <output id="specularValue" for="specular">76%</output>
           </div>
-          <input id="sweepWidth" type="range" min="8" max="26" value="16">
+          <input id="specular" type="range" min="8" max="100" value="76">
         </div>
 
         <div class="field">
           <div class="label-row">
-            <label for="speed">Velocidad hover</label>
-            <output id="speedValue" for="speed">0.82s</output>
+            <label for="tint">Tinte metalico</label>
+            <output id="tintValue" for="tint">64%</output>
           </div>
-          <input id="speed" type="range" min="0.35" max="1.8" step="0.01" value="0.82">
+          <input id="tint" type="range" min="10" max="100" value="64">
         </div>
 
         <div class="field">
           <div class="label-row">
             <label for="glow">Halo</label>
-            <output id="glowValue" for="glow">16px</output>
+            <output id="glowValue" for="glow">34%</output>
           </div>
-          <input id="glow" type="range" min="0" max="40" value="16">
+          <input id="glow" type="range" min="0" max="100" value="34">
+        </div>
+
+        <div class="field">
+          <div class="label-row">
+            <label for="isolate">Aislamiento figuras</label>
+            <output id="isolateValue" for="isolate">68%</output>
+          </div>
+          <input id="isolate" type="range" min="16" max="100" value="68">
         </div>
 
         <div class="button-row">
@@ -96,12 +98,12 @@
           <button id="downloadExport" type="button" class="button">Descargar HTML</button>
         </div>
 
-        <div class="field field--export" id="exportField">
+        <div id="exportField" class="field field--export">
           <div class="label-row">
             <label for="exportCode">Snippet exportado</label>
             <span id="copyFeedback" class="feedback" aria-live="polite"></span>
           </div>
-          <p class="hint">Si el destino bloquea <code>&lt;script&gt;</code> inline, el hotspot dinamico no funcionara. En ese caso usa el HTML descargado como base o adapta el JS al proyecto destino.</p>
+          <p class="hint">El export incluye canvas y script inline para reconstruir el relight. Si el destino bloquea scripts inline, usa el HTML descargado como base e integra el JS en tu proyecto.</p>
           <textarea id="exportCode" readonly spellcheck="false"></textarea>
         </div>
       </section>
@@ -109,24 +111,16 @@
 
     <main class="preview">
       <div class="preview__toolbar">
-        <span class="pill">CSS mask + gradients</span>
-        <span id="assetStatus" class="pill pill--accent">Gradiente demo + placeholder</span>
+        <span class="pill">Canvas relief relight</span>
+        <span id="assetStatus" class="pill pill--accent">Demo relief activo</span>
       </div>
 
-      <div id="stage" class="stage" aria-label="Preview del efecto metalizado">
-        <div id="stageBackdrop" class="stage__backdrop"></div>
-        <div class="stage__grain"></div>
-
-        <div id="artifact" class="artifact">
-          <div class="artifact__layer artifact__base"></div>
-          <div class="artifact__layer artifact__sheen"></div>
-          <div class="artifact__layer artifact__pointer"></div>
-          <div class="artifact__rim"></div>
-        </div>
+      <div id="stage" class="stage" aria-label="Preview del relieve metalizado">
+        <div id="stageMount" class="stage__mount"></div>
 
         <div class="stage__caption">
-          <strong>Pasa el puntero</strong>
-          <span>El hotspot sigue el mouse y la banda de brillo cruza la figura al hacer hover.</span>
+          <strong>Mueve el cursor sobre la escena</strong>
+          <span>El color no sustituye el relieve original: lo reutiliza para recalcular luz, especular y volumen aparente en tiempo real.</span>
         </div>
       </div>
     </main>
